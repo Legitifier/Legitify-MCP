@@ -1,0 +1,101 @@
+openapi: 3.0.3
+info:
+  title: Legitify Attestation API
+  version: 0.1.0
+  description: |
+    Legitify provides human attestation (approval receipts) for high-impact AI actions.
+servers:
+  - url: https://legitimizeai.com/api
+paths:
+  /attestations/request:
+    post:
+      summary: Submit an attestation request
+      operationId: submitAttestationRequest
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AttestationRequest'
+      responses:
+        '200':
+          description: Accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AttestationResponse'
+  /attestations/{attestation_request_id}:
+    get:
+      summary: Get attestation status
+      operationId: getAttestationStatus
+      parameters:
+        - name: attestation_request_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AttestationStatus'
+components:
+  schemas:
+    AttestationRequest:
+      type: object
+      required: [title, summary]
+      properties:
+        kind:
+          type: string
+          enum: [contract, filing, compliance_action, financial_instruction, deploy, access]
+        title:
+          type: string
+        summary:
+          type: string
+        risk_level:
+          type: string
+          enum: [low, medium, high]
+        links:
+          type: array
+          items:
+            type: string
+            format: uri
+        evidence:
+          type: array
+          items:
+            type: string
+        spend_usd:
+          type: number
+          minimum: 0
+        currency:
+          type: string
+          default: USD
+    AttestationResponse:
+      type: object
+      required: [ok, status, attestation_request_id]
+      properties:
+        ok:
+          type: boolean
+        status:
+          type: string
+          enum: [pending, needs_info, approved, denied]
+        attestation_request_id:
+          type: string
+        next:
+          type: object
+          properties:
+            message:
+              type: string
+    AttestationStatus:
+      type: object
+      required: [ok, status, attestation_request_id]
+      properties:
+        ok:
+          type: boolean
+        status:
+          type: string
+          enum: [pending, needs_info, approved, denied]
+        attestation_request_id:
+          type: string
